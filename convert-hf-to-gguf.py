@@ -67,18 +67,18 @@ class Model:
         if type(self) is Model:
             raise TypeError(f"{type(self).__name__!r} should not be directly instantiated")
         self.dir_model = dir_model
-        self.ftype = ftype
+        self.ftype = ftype#float type
         self.is_big_endian = is_big_endian
         self.endianess = gguf.GGUFEndian.BIG if is_big_endian else gguf.GGUFEndian.LITTLE
         self.use_temp_file = use_temp_file
-        self.lazy = not eager
+        self.lazy = not eager#????
         self.part_names = Model.get_model_part_names(self.dir_model, ".safetensors")
         self.is_safetensors = len(self.part_names) > 0
         if not self.is_safetensors:
             self.part_names = Model.get_model_part_names(self.dir_model, ".bin")
-        self.hparams = Model.load_hparams(self.dir_model)
+        self.hparams = Model.load_hparams(self.dir_model)#config.json parameter
         self.block_count = self.find_hparam(["n_layers", "num_hidden_layers", "n_layer"])
-        self.tensor_map = gguf.get_tensor_name_map(self.model_arch, self.block_count)
+        self.tensor_map = gguf.get_tensor_name_map(self.model_arch, self.block_count)#gguf mapping
         self.tensor_names = None
         if self.ftype == gguf.LlamaFileType.GUESSED:
             # NOTE: can't use field "torch_dtype" in config.json, because some finetunes lie.
@@ -93,7 +93,7 @@ class Model:
         ftype_lw: str = ftype_up.lower()
         # allow templating the file name with the output ftype, useful with the "auto" ftype
         self.fname_out = fname_out.parent / fname_out.name.format(ftype_lw, outtype=ftype_lw, ftype=ftype_lw, OUTTYPE=ftype_up, FTYPE=ftype_up)
-        self.gguf_writer = gguf.GGUFWriter(self.fname_out, gguf.MODEL_ARCH_NAMES[self.model_arch], endianess=self.endianess, use_temp_file=self.use_temp_file)
+        self.gguf_writer = gguf.GGUFWriter(self.fname_out, gguf.MODEL_ARCH_NAMES[self.model_arch], endianess=self.endianess, use_temp_file=self.use_temp_file)#gguf 생성
 
     @classmethod
     def __init_subclass__(cls):
@@ -1308,7 +1308,7 @@ class LlamaModel(Model):
         super().set_gguf_parameters()
         hparams = self.hparams
         self.gguf_writer.add_vocab_size(hparams["vocab_size"])
-        self.gguf_writer.add_rope_dimension_count(hparams["hidden_size"] // hparams["num_attention_heads"])
+        self.gguf_writer.add_rope_dimension_count(hparams["hidden_size"] // hparams["num_attention_heads"])    # hidden / attention_head -> rope dimension count??????
 
         if self.hparams.get("rope_scaling") is not None and "factor" in self.hparams["rope_scaling"]:
             if self.hparams["rope_scaling"].get("type") == "linear":

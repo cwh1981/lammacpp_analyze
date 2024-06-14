@@ -196,10 +196,10 @@ int main(int argc, char ** argv) {
 
     // load the model and apply lora adapter, if any
     LOG("%s: load the model and apply lora adapter, if any\n", __func__);
-    std::tie(model, ctx) = llama_init_from_gpt_params(params);
+    std::tie(model, ctx) = llama_init_from_gpt_params(params);//common -> llama.cpp, changwan.ha
     if (sparams.cfg_scale > 1.f) {
         struct llama_context_params lparams = llama_context_params_from_gpt_params(params);
-        ctx_guidance = llama_new_context_with_model(model, lparams);
+        ctx_guidance = llama_new_context_with_model(model, lparams);// llama.cpp changwan.ha
     }
 
     if (model == NULL) {
@@ -207,8 +207,8 @@ int main(int argc, char ** argv) {
         return 1;
     }
 
-    const int n_ctx_train = llama_n_ctx_train(model);
-    const int n_ctx = llama_n_ctx(ctx);
+    const int n_ctx_train = llama_n_ctx_train(model);// llama.cpp changwan.ha
+    const int n_ctx = llama_n_ctx(ctx);// llama.cpp changwan.ha
     LOG("n_ctx: %d\n", n_ctx);
 
     if (n_ctx > n_ctx_train) {
@@ -255,7 +255,7 @@ int main(int argc, char ** argv) {
         if (params.chatml) {
             params.prompt = "<|im_start|>system\n" + params.prompt + "<|im_end|>";
         }
-        embd_inp = ::llama_tokenize(ctx, params.prompt, true, true);
+        embd_inp = ::llama_tokenize(ctx, params.prompt, true, true);//llama.cpp changwan.ha
     } else {
         LOG("use session tokens\n");
         embd_inp = session_tokens;
@@ -316,7 +316,7 @@ int main(int argc, char ** argv) {
         }
 
         // remove any "future" tokens that we might have inherited from the previous session
-        llama_kv_cache_seq_rm(ctx, -1, n_matching_session_tokens, -1);
+        llama_kv_cache_seq_rm(ctx, -1, n_matching_session_tokens, -1);//llama.cpp changwan.ha
     }
 
     LOGLN(
